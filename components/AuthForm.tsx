@@ -9,30 +9,58 @@ import { useForm } from "react-hook-form"
 import {
     FieldGroup,
 } from "@/components/ui/field"
-import { Input } from "./ui/input"
+// import { Input } from "./ui/input"
 import { Button } from "./ui/button"
 import FormController from "./FormController"
 import { authFormSchema } from "@/lib/utils"
 import { Loader2 } from "lucide-react"
+import { signIn, signUp } from "@/lib/actions/user.action"
+import {useRouter} from "next/navigation"
 
 const AuthForm = ({ type }: { type: string }) => {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const formschema = authFormSchema(type);
+    const router = useRouter();
     const form = useForm<z.infer<typeof formschema>>({
         resolver: zodResolver(formschema),
         defaultValues: {
             email: "",
             password: "",
+            firstName: "",
+            lastName: "",
+            address1: "",
+            city: "",
+            state: "",
+            postalCode: "",
+            dateOfBirth: "",
+            ssn: "",
         },
     })
 
-    function onSubmit(data: z.infer<typeof authFormSchema>) {
+    async function onSubmit(data: z.infer<typeof authFormSchema>) {
         setIsLoading(true);
         try {
-            
+            if(type === "sign-up"){
+                const newUser = await signUp(data);
+                setUser(newUser);
+                console.log("newuser: ", newUser);
+            }
+            if(type === "sign-in"){
+                const response = await signIn({
+                    email: data.email,
+                    password: data.password
+                })
+
+                console.log("Logged In user : ", response);
+                
+                if(response){
+                    localStorage.setItem("user", JSON.stringify(response));
+                    router.push("/")
+                }
+            }
         } catch (error) {
-            
+            console.log("Error");
         }finally{
             setIsLoading(false);
         }
@@ -74,7 +102,8 @@ const AuthForm = ({ type }: { type: string }) => {
                     <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}
                     // className="space-y-8"
                     >
-                        {
+                       <FieldGroup>
+                         {
                             type == "sign-up" && (
                                 <div className="flex flex-col">
                                     <div className="flex flex-row justify-between">
@@ -113,7 +142,7 @@ const AuthForm = ({ type }: { type: string }) => {
 
                                     <div className="flex flex-row justify-between mt-5">
                                     <FormController
-                                        control={form.control} name="dob"
+                                        control={form.control} name="dateOfBirth"
                                         placeholder="Enter Your dob" label="Date Of Birth"
                                     />
                                     <FormController
@@ -124,6 +153,7 @@ const AuthForm = ({ type }: { type: string }) => {
                                 </div>
                             )
                         }
+                       </FieldGroup>
 
                         <FieldGroup className="mt-5">
 
