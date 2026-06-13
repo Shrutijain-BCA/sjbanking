@@ -3,6 +3,8 @@
 import User from "../models/user.model";
 import { connectDB } from "../db";
 import bcrypt from "bcryptjs";
+import { cookies } from "next/headers";
+import {redirect} from "next/navigation";
 
 export const signIn = async (userData: signInProps) => {
   try {
@@ -19,8 +21,13 @@ export const signIn = async (userData: signInProps) => {
       throw new Error("Invalid credentials");
     }
     if (existingUser) {
-      return JSON.parse(JSON.stringify(existingUser));
+      const cookieStore = await cookies();
+      cookieStore.set("userId", existingUser._id.toString());
+      return {
+        userId: existingUser._id.toString(),
+      };
     }
+
   } catch (error) {
     console.log(error);
   }
@@ -59,4 +66,10 @@ export const signUp = async (userData: SignUpParams) => {
   } catch (error) {
     console.log(error);
   }
+};
+
+export const Logout = async () => {
+  const cookieStore = await cookies();
+  cookieStore.delete("userId");
+  redirect("/sign-in");
 };

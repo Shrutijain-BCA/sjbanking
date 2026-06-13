@@ -55,7 +55,6 @@ const AuthForm = ({ type }: { type: string }) => {
                 console.log("Logged In user : ", response);
                 
                 if(response){
-                    localStorage.setItem("user", JSON.stringify(response));
                     router.push("/")
                 }
             }

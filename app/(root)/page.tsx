@@ -1,12 +1,21 @@
 import HeaderBox from "@/components/HeaderBox"
 import RightSidebar from "@/components/RightSidebar"
 import TotalBalanceBox from "@/components/TotalBalanceBox"
-const Home = () => {
-  let loggedIN = {
-    firstName: "Shruti",
-    lastName: "Jain",
-    email: "sj@gmail.com"
+import { cookies } from "next/headers";
+import { connectDB } from "@/lib/db";
+import User from "@/lib/models/user.model";
+import { redirect  } from "next/navigation";
+const Home = async () => {
+  const cookieStore = await cookies();
+  const userId = cookieStore.get("userId")?.value;
+    if (!userId) {
+    redirect("/sign-in");
   }
+  await connectDB();
+  const loggedIN = await User.findById(userId);
+
+  console.log("loggggggged in inside dashboard: ", loggedIN);
+
   return (
     <section className='home'>
       <div className="home-content">
